@@ -26,6 +26,9 @@ class Function(Enum):
 
 
 def dataframe_add_months_years(dataframe: pd.DataFrame) -> pd.DataFrame:
+    # adds month and year columns to the dataframe.
+    # data frame should have a column date of type datetime
+
     months = []
     years = []
     for date in dataframe['date']:
@@ -36,6 +39,8 @@ def dataframe_add_months_years(dataframe: pd.DataFrame) -> pd.DataFrame:
 
 
 def dataset_info(dataframe: pd.DataFrame):
+    # prints information about the dataset
+
     print(dataframe)
 
     dataframe.info(verbose=True)
@@ -60,6 +65,8 @@ def temp_max_histplot(dataframe: pd.DataFrame):
 
 
 def temp_max_facegrid_lineplot(dataframe: pd.DataFrame):
+    # pritns 4 lineplots for the maximum temperature
+
     dataframe = dataframe_add_months_years(dataframe)
 
     g = seaborn.FacetGrid(dataframe, col='year', col_wrap=4)
@@ -69,6 +76,8 @@ def temp_max_facegrid_lineplot(dataframe: pd.DataFrame):
 
 
 def precipitation_facegrid_scatterplot(dataframe: pd.DataFrame):
+    # pritns 4 scatterplots for precicitations
+
     dataframe = dataframe_add_months_years(dataframe)
 
     g = seaborn.FacetGrid(dataframe, col='year', col_wrap=4)
@@ -78,11 +87,15 @@ def precipitation_facegrid_scatterplot(dataframe: pd.DataFrame):
 
 
 def weather_countplot(dataframe: pd.DataFrame):
+    # prints a bar plot that shows how many of each weather types have been recorded
+
     seaborn.countplot(dataframe, x='weather')
     plt.show()
 
 
 def weather_piechart(dataframe: pd.DataFrame):
+    # prints the distribution of weather types as a pie chart
+
     weather_type_counts = dataframe['weather'].value_counts()
     plt.pie(weather_type_counts, labels=weather_type_counts.keys(), autopct='%1.1f%%')
     plt.title("Weather piechart")
@@ -90,6 +103,9 @@ def weather_piechart(dataframe: pd.DataFrame):
 
 
 def lr_predictor_with_split(dataframe: pd.DataFrame, test_size=0.2, no_plot=False):
+    # uses linear regression to predict the maximum temperature for a given split
+    # prints a line plot showing the actual data vs the predicted data
+
     temps_max = dataframe['temp_max']
 
     features = dataframe[['precipitation', 'month', 'year', 'wind', 'date', 'temp_min']].dropna()
@@ -129,8 +145,11 @@ def lr_predictor_default_split(dataframe: pd.DataFrame):
 
 
 def svr_predictor_default_split(dataframe: pd.DataFrame):
-    reg= make_pipeline(StandardScaler(),
-                         LinearSVR(random_state=0, tol=1e-5))
+    # uses LinearSVR to predict the minimum temperature for a given split
+    # prints a line plot showing the actual data vs the predicted data
+
+    reg = make_pipeline(StandardScaler(),
+                        LinearSVR(random_state=0, tol=1e-5))
 
     temps_min = dataframe['temp_min']
 
@@ -157,14 +176,14 @@ def svr_predictor_default_split(dataframe: pd.DataFrame):
     plt.show()
 
 
-
 def main():
     df = pd.read_csv('seattle-weather.csv')
 
-
+    # turn date into datetime
     df['date'] = pd.to_datetime(df['date'])
     df = dataframe_add_months_years(df)
 
+    # implemented fucntionalities of the program
     print("Functions: ")
     for function in Function:
         print(function.name, ":", function.value)
@@ -200,6 +219,7 @@ def main():
 
             case Function.SVR_DEFAULT:
                 svr_predictor_default_split(dataframe=df)
+
 
 if __name__ == '__main__':
     main()
