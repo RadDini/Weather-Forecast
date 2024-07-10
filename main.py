@@ -3,11 +3,28 @@ import seaborn
 import matplotlib.pyplot as plt
 import datetime
 
+from enum import Enum
+
+
+class Function(Enum):
+    INFO = 1
+    TEMP_MAX_HISTPLOT = 2
+    TEMP_MAX_FACEGRID = 3
+    PRECIP_HISTPLOT = 4
+
+
+def dataframe_add_months_years(dataframe: pd.DataFrame) -> pd.DataFrame:
+    months = []
+    years = []
+    for date in dataframe['date']:
+        dt = datetime.datetime.strptime(date, '%Y-%m-%d')
+        months.append(int(dt.month))
+        years.append(int(dt.year))
+
+    return dataframe.assign(month=months, year=years)
+
 
 def dataset_info(dataframe: pd.DataFrame):
-    """ TODO:
-    """
-
     print(dataframe)
 
     dataframe.info(verbose=True)
@@ -26,25 +43,13 @@ def dataset_info(dataframe: pd.DataFrame):
 
 
 def temp_max_histplot(dataframe: pd.DataFrame):
-    """ TODO:
-    """
-
     seaborn.histplot(dataframe, x='temp_max')
     plt.title("Temperature distribution")
     plt.show()
 
 
 def temp_max_facegrid_lineplot(dataframe: pd.DataFrame):
-    """ TODO:
-    """
-    months = []
-    years = []
-    for date in dataframe['date']:
-        dt = datetime.datetime.strptime(date, '%Y-%m-%d')
-        months.append(int(dt.month))
-        years.append(int(dt.year))
-
-    dataframe = dataframe.assign(month=months, year=years)
+    dataframe = dataframe_add_months_years(dataframe)
 
     g = seaborn.FacetGrid(dataframe, col='year', col_wrap=4)
     g.map(seaborn.lineplot, 'month', 'temp_max')
@@ -53,8 +58,12 @@ def temp_max_facegrid_lineplot(dataframe: pd.DataFrame):
 
 
 def precipitation_facegrid_scatterplot(dataframe: pd.DataFrame):
-    """ TODO:
-    """
+    dataframe = dataframe_add_months_years(dataframe)
+
+    g = seaborn.FacetGrid(dataframe, col='year', col_wrap=4)
+    g.map(seaborn.scatterplot, 'month', 'precipitation')
+
+    plt.show()
 
 
 def weather_countplot(dataframe: pd.DataFrame):
@@ -84,11 +93,27 @@ def svr_predictor_default_split(dataframe: pd.DataFrame):
 
 def main():
     df = pd.read_csv('seattle-weather.csv')
-    # dataset_info(df)
 
-    # temp_max_histplot(dataframe=df)
+    print("Functions: ")
+    for function in Function:
+        print(function.name, ":", function.value)
 
-    temp_max_facegrid_lineplot(dataframe=df)
+    while True:
+        choice = Function(int(input("Choose function: ")))
+        print(choice)
+
+        match choice:
+            case Function.INFO:
+                dataset_info(df)
+
+            case Function.TEMP_MAX_HISTPLOT:
+                temp_max_histplot(dataframe=df)
+
+            case Function.TEMP_MAX_FACEGRID:
+                temp_max_facegrid_lineplot(dataframe=df)
+
+            case Function.PRECIP_HISTPLOT:
+                precipitation_facegrid_scatterplot(dataframe=df)
 
 
 if __name__ == '__main__':
