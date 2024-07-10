@@ -1,14 +1,13 @@
+import datetime
+from enum import Enum
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn
-import matplotlib.pyplot as plt
-import datetime
+from sklearn import metrics
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
-from sklearn import metrics
-
-
-from enum import Enum
 
 
 class Function(Enum):
@@ -86,49 +85,40 @@ def weather_piechart(dataframe: pd.DataFrame):
     plt.title("Weather piechart")
     plt.show()
 
-def lr_predictor_random_split(dataframe: pd.DataFrame):
+
+def lr_predictor_with_split(dataframe: pd.DataFrame, test_size=0.2):
     dataframe = dataframe_add_months_years(dataframe)
+    dataframe['date'] = pd.to_datetime(dataframe['date'])
 
     temps_max = dataframe['temp_max']
 
-    features = dataframe[['precipitation', 'month', 'year', 'wind']].dropna()
+    features = dataframe[['precipitation', 'month', 'year', 'wind', 'date', 'temp_min']].dropna()
 
-    X_train, X_test, y_train, y_test = train_test_split(features, temps_max, test_size=1300, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(features, temps_max, test_size=test_size, random_state=42,
+                                                        shuffle=False)
 
-    reg = LinearRegression().fit(X_train, y_train)
-    print(pd.DataFrame(reg.coef_, features.columns, columns=['Coeff']))
+    reg = LinearRegression().fit(X_train.drop('date', axis=1), y_train)
+    print(pd.DataFrame(reg.coef_, features.drop('date', axis=1).columns, columns=['Coeff']))
 
-    predictions = reg.predict(X_test)
+    predictions = reg.predict(X_test.drop('date', axis=1))
     print("MSE:", metrics.mean_squared_error(y_test, predictions))
 
-    plt.scatter(y_test, predictions)
+    y_predicted = np.array(predictions)
+    y_actual = np.array(y_test)
+    date = np.array(X_test['date'])
+
+    plt.plot(date, y_predicted)
+    plt.plot(date, y_actual)
 
     plt.show()
+
+
+def lr_predictor_random_split(dataframe: pd.DataFrame):
+    lr_predictor_with_split(dataframe, test_size=0.11)
 
 
 def lr_predictor_default_split(dataframe: pd.DataFrame):
-    dataframe = dataframe_add_months_years(dataframe)
-
-    temps_max = dataframe['temp_max']
-
-    features = dataframe[['precipitation', 'month', 'year', 'wind']].dropna()
-
-    X_train, X_test, y_train, y_test = train_test_split(features, temps_max, random_state=42)
-
-    reg = LinearRegression().fit(X_train, y_train)
-    print(pd.DataFrame(reg.coef_, features.columns, columns=['Coeff']))
-
-    predictions = reg.predict(X_test)
-    print("MSE:", metrics.mean_squared_error(y_test, predictions))
-
-    plt.scatter(y_test, predictions)
-
-    plt.show()
-
-
-
-
-
+    lr_predictor_with_split(dataframe)
 
 
 def svr_predictor_default_split(dataframe: pd.DataFrame):
@@ -171,6 +161,7 @@ def main():
 
             case Function.LR_RANDOM:
                 lr_predictor_random_split(dataframe=df)
+
 
 if __name__ == '__main__':
     main()

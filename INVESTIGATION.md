@@ -74,3 +74,43 @@ Most common weather:
 ![img.png](images/weather_countplot.png)
 6. Weather piechart
 ![img.png](images/weather_piechart.png)
+
+
+# Predictions!!
+
+1. Linear Regression with 80/20 split
+![img.png](images/lr_temp_max_default.png)
+
+Coeff:
+
+    precipitation -0.170536
+---
+    month         -0.046500
+---
+    year          -0.112052
+---
+    wind          -0.269172
+---
+    temp_min       1.243752
+---
+
+
+MSE: 11.297832171916616
+
+1. Linear Regression with 1300 train units and 160 test
+![img.png](images/lr_temp_max_random.png)
+
+Coeff:
+
+    precipitation -0.173899
+---
+    month         -0.043918
+---
+    year           0.133504
+---
+    wind          -0.272315
+---
+    temp_min       1.259584
+---
+
+MSE: 9.570734696689296
