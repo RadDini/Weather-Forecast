@@ -72,3 +72,5 @@ Most common weather:
 ![img.png](images/precip_scatterplot.png)
 5. Weather countplot
 ![img.png](images/weather_countplot.png)
+6. Weather piechart
+![img.png](images/weather_piechart.png)

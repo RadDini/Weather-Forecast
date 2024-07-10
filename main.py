@@ -12,6 +12,7 @@ class Function(Enum):
     TEMP_MAX_FACEGRID = 3
     PRECIP_HISTPLOT = 4
     WEATHER_COUNTPLOT = 5
+    WEATHER_PIECHART = 6
 
 
 def dataframe_add_months_years(dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -73,9 +74,10 @@ def weather_countplot(dataframe: pd.DataFrame):
 
 
 def weather_piechart(dataframe: pd.DataFrame):
-    """ TODO:
-    """
-
+    weather_type_counts = dataframe['weather'].value_counts()
+    plt.pie(weather_type_counts, labels=weather_type_counts.keys(), autopct='%1.1f%%')
+    plt.title("Weather piechart")
+    plt.show()
 
 def lr_predictor_random_split(dataframe: pd.DataFrame):
     """ TODO:
@@ -119,6 +121,8 @@ def main():
             case Function.WEATHER_COUNTPLOT:
                 weather_countplot(dataframe=df)
 
+            case Function.WEATHER_PIECHART:
+                weather_piechart(dataframe=df)
 
 if __name__ == '__main__':
     main()
