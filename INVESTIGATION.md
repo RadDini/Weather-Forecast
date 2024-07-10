@@ -79,7 +79,7 @@ Most common weather:
 # Predictions!!
 
 1. Linear Regression with 80/20 split
-![img.png](images/lr_temp_max_default.png)
+![img.png](images/lr_default.png)
 
 Coeff:
 
@@ -98,7 +98,7 @@ Coeff:
 MSE: 11.297832171916616
 
 2. Linear Regression with 1300 train units and 160 test
-![img.png](images/lr_temp_max_random.png)
+![img.png](images/lr_random.png)
 
 Coeff:
 
@@ -114,6 +114,7 @@ Coeff:
 ---
 
 MSE: 9.570734696689296
+
 
 3. SVR with 80/20 split for temp_min
 ![img.png](images/svr_min_temp_default_split.png)

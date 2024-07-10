@@ -29,9 +29,8 @@ def dataframe_add_months_years(dataframe: pd.DataFrame) -> pd.DataFrame:
     months = []
     years = []
     for date in dataframe['date']:
-        dt = datetime.datetime.strptime(date, '%Y-%m-%d')
-        months.append(int(dt.month))
-        years.append(int(dt.year))
+        months.append(int(date.month))
+        years.append(int(date.year))
 
     return dataframe.assign(month=months, year=years)
 
@@ -90,10 +89,7 @@ def weather_piechart(dataframe: pd.DataFrame):
     plt.show()
 
 
-def lr_predictor_with_split(dataframe: pd.DataFrame, test_size=0.2):
-    dataframe = dataframe_add_months_years(dataframe)
-    dataframe['date'] = pd.to_datetime(dataframe['date'])
-
+def lr_predictor_with_split(dataframe: pd.DataFrame, test_size=0.2, no_plot=False):
     temps_max = dataframe['temp_max']
 
     features = dataframe[['precipitation', 'month', 'year', 'wind', 'date', 'temp_min']].dropna()
@@ -107,12 +103,19 @@ def lr_predictor_with_split(dataframe: pd.DataFrame, test_size=0.2):
     predictions = reg.predict(X_test.drop('date', axis=1))
     print("MSE:", metrics.mean_squared_error(y_test, predictions))
 
+    if no_plot:
+        return
+
     y_predicted = np.array(predictions)
     y_actual = np.array(y_test)
     date = np.array(X_test['date'])
 
     plt.plot(date, y_predicted)
     plt.plot(date, y_actual)
+
+    plt.title(f"Linear Regression with test size {test_size}%")
+    plt.xlabel("Date")
+    plt.ylabel("Maximum temperature")
 
     plt.show()
 
@@ -126,9 +129,6 @@ def lr_predictor_default_split(dataframe: pd.DataFrame):
 
 
 def svr_predictor_default_split(dataframe: pd.DataFrame):
-    dataframe = dataframe_add_months_years(dataframe)
-    dataframe['date'] = pd.to_datetime(dataframe['date'])
-
     reg= make_pipeline(StandardScaler(),
                          LinearSVR(random_state=0, tol=1e-5))
 
@@ -151,6 +151,8 @@ def svr_predictor_default_split(dataframe: pd.DataFrame):
 
     plt.plot(date, y_predicted)
     plt.plot(date, y_actual)
+    plt.xlabel("Date")
+    plt.ylabel("Minimum temperature")
 
     plt.show()
 
@@ -158,6 +160,10 @@ def svr_predictor_default_split(dataframe: pd.DataFrame):
 
 def main():
     df = pd.read_csv('seattle-weather.csv')
+
+
+    df['date'] = pd.to_datetime(df['date'])
+    df = dataframe_add_months_years(df)
 
     print("Functions: ")
     for function in Function:
