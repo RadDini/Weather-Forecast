@@ -1,7 +1,12 @@
+import numpy as np
 import pandas as pd
 import seaborn
 import matplotlib.pyplot as plt
 import datetime
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn import metrics
+
 
 from enum import Enum
 
@@ -13,6 +18,8 @@ class Function(Enum):
     PRECIP_HISTPLOT = 4
     WEATHER_COUNTPLOT = 5
     WEATHER_PIECHART = 6
+    LR_DEFAULT = 7
+    LR_RANDOM = 8
 
 
 def dataframe_add_months_years(dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -80,13 +87,48 @@ def weather_piechart(dataframe: pd.DataFrame):
     plt.show()
 
 def lr_predictor_random_split(dataframe: pd.DataFrame):
-    """ TODO:
-    """
+    dataframe = dataframe_add_months_years(dataframe)
+
+    temps_max = dataframe['temp_max']
+
+    features = dataframe[['precipitation', 'month', 'year', 'wind']].dropna()
+
+    X_train, X_test, y_train, y_test = train_test_split(features, temps_max, test_size=1300, random_state=42)
+
+    reg = LinearRegression().fit(X_train, y_train)
+    print(pd.DataFrame(reg.coef_, features.columns, columns=['Coeff']))
+
+    predictions = reg.predict(X_test)
+    print("MSE:", metrics.mean_squared_error(y_test, predictions))
+
+    plt.scatter(y_test, predictions)
+
+    plt.show()
 
 
 def lr_predictor_default_split(dataframe: pd.DataFrame):
-    """ TODO:
-    """
+    dataframe = dataframe_add_months_years(dataframe)
+
+    temps_max = dataframe['temp_max']
+
+    features = dataframe[['precipitation', 'month', 'year', 'wind']].dropna()
+
+    X_train, X_test, y_train, y_test = train_test_split(features, temps_max, random_state=42)
+
+    reg = LinearRegression().fit(X_train, y_train)
+    print(pd.DataFrame(reg.coef_, features.columns, columns=['Coeff']))
+
+    predictions = reg.predict(X_test)
+    print("MSE:", metrics.mean_squared_error(y_test, predictions))
+
+    plt.scatter(y_test, predictions)
+
+    plt.show()
+
+
+
+
+
 
 
 def svr_predictor_default_split(dataframe: pd.DataFrame):
@@ -123,6 +165,12 @@ def main():
 
             case Function.WEATHER_PIECHART:
                 weather_piechart(dataframe=df)
+
+            case Function.LR_DEFAULT:
+                lr_predictor_default_split(dataframe=df)
+
+            case Function.LR_RANDOM:
+                lr_predictor_random_split(dataframe=df)
 
 if __name__ == '__main__':
     main()
