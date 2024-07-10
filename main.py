@@ -8,6 +8,9 @@ import seaborn
 from sklearn import metrics
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
+from sklearn.svm import LinearSVR
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 
 
 class Function(Enum):
@@ -19,6 +22,7 @@ class Function(Enum):
     WEATHER_PIECHART = 6
     LR_DEFAULT = 7
     LR_RANDOM = 8
+    SVR_DEFAULT = 9
 
 
 def dataframe_add_months_years(dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -122,8 +126,34 @@ def lr_predictor_default_split(dataframe: pd.DataFrame):
 
 
 def svr_predictor_default_split(dataframe: pd.DataFrame):
-    """ TODO:
-    """
+    dataframe = dataframe_add_months_years(dataframe)
+    dataframe['date'] = pd.to_datetime(dataframe['date'])
+
+    reg= make_pipeline(StandardScaler(),
+                         LinearSVR(random_state=0, tol=1e-5))
+
+    temps_min = dataframe['temp_min']
+
+    features = dataframe[['precipitation', 'month', 'year', 'wind', 'date', 'temp_max']].dropna()
+
+    X_train, X_test, y_train, y_test = train_test_split(features, temps_min, test_size=0.2, random_state=42,
+                                                        shuffle=False)
+
+    reg.fit(X_train.drop('date', axis=1), y_train)
+    print("Score: ", reg.score(X_test.drop('date', axis=1), y_test))
+
+    predictions = reg.predict(X_test.drop('date', axis=1))
+    print("MSE:", metrics.mean_squared_error(y_test, predictions))
+
+    y_predicted = np.array(predictions)
+    y_actual = np.array(y_test)
+    date = np.array(X_test['date'])
+
+    plt.plot(date, y_predicted)
+    plt.plot(date, y_actual)
+
+    plt.show()
+
 
 
 def main():
@@ -162,6 +192,8 @@ def main():
             case Function.LR_RANDOM:
                 lr_predictor_random_split(dataframe=df)
 
+            case Function.SVR_DEFAULT:
+                svr_predictor_default_split(dataframe=df)
 
 if __name__ == '__main__':
     main()
