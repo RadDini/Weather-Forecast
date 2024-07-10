@@ -1,4 +1,7 @@
 import pandas as pd
+import seaborn
+import matplotlib.pyplot as plt
+import datetime
 
 
 def dataset_info(dataframe: pd.DataFrame):
@@ -22,17 +25,31 @@ def dataset_info(dataframe: pd.DataFrame):
     print(dataframe.drop('date', axis=1).mode())
 
 
-
-
-
 def temp_max_histplot(dataframe: pd.DataFrame):
     """ TODO:
     """
+
+    seaborn.histplot(dataframe, x='temp_max')
+    plt.title("Temperature distribution")
+    plt.show()
 
 
 def temp_max_facegrid_lineplot(dataframe: pd.DataFrame):
     """ TODO:
     """
+    months = []
+    years = []
+    for date in dataframe['date']:
+        dt = datetime.datetime.strptime(date, '%Y-%m-%d')
+        months.append(int(dt.month))
+        years.append(int(dt.year))
+
+    dataframe = dataframe.assign(month=months, year=years)
+
+    g = seaborn.FacetGrid(dataframe, col='year', col_wrap=4)
+    g.map(seaborn.lineplot, 'month', 'temp_max')
+
+    plt.show()
 
 
 def precipitation_facegrid_scatterplot(dataframe: pd.DataFrame):
@@ -67,7 +84,11 @@ def svr_predictor_default_split(dataframe: pd.DataFrame):
 
 def main():
     df = pd.read_csv('seattle-weather.csv')
-    dataset_info(df)
+    # dataset_info(df)
+
+    # temp_max_histplot(dataframe=df)
+
+    temp_max_facegrid_lineplot(dataframe=df)
 
 
 if __name__ == '__main__':
