@@ -69,4 +69,6 @@ Most common weather:
 ![img.png](images/tamp_max_facetgrid.png)
 
 4. Facegrid precipiation
-5. ![img.png](images/precip_scatterplot.png)
+![img.png](images/precip_scatterplot.png)
+5. Weather countplot
+![img.png](images/weather_countplot.png)

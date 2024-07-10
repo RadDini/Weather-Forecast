@@ -11,6 +11,7 @@ class Function(Enum):
     TEMP_MAX_HISTPLOT = 2
     TEMP_MAX_FACEGRID = 3
     PRECIP_HISTPLOT = 4
+    WEATHER_COUNTPLOT = 5
 
 
 def dataframe_add_months_years(dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -67,8 +68,8 @@ def precipitation_facegrid_scatterplot(dataframe: pd.DataFrame):
 
 
 def weather_countplot(dataframe: pd.DataFrame):
-    """ TODO:
-    """
+    seaborn.countplot(dataframe, x='weather')
+    plt.show()
 
 
 def weather_piechart(dataframe: pd.DataFrame):
@@ -114,6 +115,9 @@ def main():
 
             case Function.PRECIP_HISTPLOT:
                 precipitation_facegrid_scatterplot(dataframe=df)
+
+            case Function.WEATHER_COUNTPLOT:
+                weather_countplot(dataframe=df)
 
 
 if __name__ == '__main__':
