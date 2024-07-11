@@ -2,6 +2,8 @@ import datetime
 from enum import Enum
 
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import matplotlib.patches as mpatches
 import numpy as np
 import pandas as pd
 import seaborn
@@ -29,13 +31,7 @@ def dataframe_add_months_years(dataframe: pd.DataFrame) -> pd.DataFrame:
     # adds month and year columns to the dataframe.
     # data frame should have a column date of type datetime
 
-    months = []
-    years = []
-    for date in dataframe['date']:
-        months.append(int(date.month))
-        years.append(int(date.year))
-
-    return dataframe.assign(month=months, year=years)
+    return dataframe.assign(month=dataframe['date'].dt.month, year=dataframe['date'].dt.year)
 
 
 def dataset_info(dataframe: pd.DataFrame):
@@ -64,24 +60,44 @@ def temp_max_histplot(dataframe: pd.DataFrame):
     plt.show()
 
 
-def temp_max_facegrid_lineplot(dataframe: pd.DataFrame):
-    # pritns 4 lineplots for the maximum temperature
+def rotate_and_skip_ticks(g):
+    for ax in g.axes.flat:
+        labels = ax.get_xticklabels()  # get x labels
+        for i, l in enumerate(labels):
+            if i % 2 == 0:
+                labels[i] = ''  # skip even labels
+        ax.set_xticks(range(len(labels)))
+        ax.set_xticklabels(labels, rotation=30)  # set new labels
 
-    dataframe = dataframe_add_months_years(dataframe)
+
+def temp_max_facegrid_lineplot(dataframe: pd.DataFrame):
+    # prints 4 line plots for the maximum temperature
+    dataframe['month_str'] = dataframe['date'].dt.strftime("%b")  # set month to its abbreviated name
 
     g = seaborn.FacetGrid(dataframe, col='year', col_wrap=4)
-    g.map(seaborn.lineplot, 'month', 'temp_max')
+    g.map(seaborn.lineplot, 'month_str', 'temp_max')
+
+    g.fig.subplots_adjust(top=0.8)  # adjust the Figure in rp
+    g.fig.suptitle('Maximum temperature distribution by year')
+
+    rotate_and_skip_ticks(g)
 
     plt.show()
 
 
 def precipitation_facegrid_scatterplot(dataframe: pd.DataFrame):
-    # pritns 4 scatterplots for precicitations
+    # prints 4 scatter plots for precipitations
+    dataframe['month_str'] = dataframe['date'].dt.strftime("%b")  # set month to its abbreviated name
 
-    dataframe = dataframe_add_months_years(dataframe)
+    plt.title("Precipitation distribution")
 
     g = seaborn.FacetGrid(dataframe, col='year', col_wrap=4)
-    g.map(seaborn.scatterplot, 'month', 'precipitation')
+    g.map(seaborn.scatterplot, 'month_str', 'precipitation', )
+
+    g.fig.subplots_adjust(top=0.8)  # adjust the Figure in rp
+    g.fig.suptitle('Precipitation distribution by year')
+
+    rotate_and_skip_ticks(g)
 
     plt.show()
 
@@ -90,6 +106,7 @@ def weather_countplot(dataframe: pd.DataFrame):
     # prints a bar plot that shows how many of each weather types have been recorded
 
     seaborn.countplot(dataframe, x='weather')
+    plt.title("Weather distribution")
     plt.show()
 
 
@@ -122,6 +139,14 @@ def lr_predictor_with_split(dataframe: pd.DataFrame, test_size=0.2, no_plot=Fals
     if no_plot:
         return
 
+    test_size = int(test_size * len(dataframe.index))
+    train_size = len(dataframe.index) - test_size
+    random_split_size = int(0.11 * len(dataframe.index))
+
+    random_split_first_date = dataframe.iloc[test_size - random_split_size + train_size]['date']
+    print(random_split_first_date)
+
+
     y_predicted = np.array(predictions)
     y_actual = np.array(y_test)
     date = np.array(X_test['date'])
@@ -129,7 +154,23 @@ def lr_predictor_with_split(dataframe: pd.DataFrame, test_size=0.2, no_plot=Fals
     plt.plot(date, y_predicted)
     plt.plot(date, y_actual)
 
-    plt.title(f"Linear Regression with test size {test_size}%")
+    orange_patch = mpatches.Patch(color='orange', label='Actual data')
+    blue_patch = mpatches.Patch(color='blue', label='Predicted data')
+
+    if test_size > random_split_size:
+        plt.axvline(random_split_first_date, color='r')
+        red_patch = mpatches.Patch(color='red', label='Data intersection with smaller test size')
+        plt.legend(handles=[red_patch, orange_patch, blue_patch])
+    else:
+        plt.legend(handles=[orange_patch, blue_patch])
+
+    locator = mdates.AutoDateLocator(minticks=5, maxticks=10)
+    formatter = mdates.AutoDateFormatter(locator)
+
+    plt.gca().xaxis.set_major_locator(locator)
+    plt.gca().xaxis.set_major_formatter(formatter)
+
+    plt.title(f"Linear Regression with test size {int(test_size)}")
     plt.xlabel("Date")
     plt.ylabel("Maximum temperature")
 
@@ -168,10 +209,17 @@ def svr_predictor_default_split(dataframe: pd.DataFrame):
     y_actual = np.array(y_test)
     date = np.array(X_test['date'])
 
+    locator = mdates.AutoDateLocator(minticks=5, maxticks=10)
+    formatter = mdates.AutoDateFormatter(locator)
+
+    plt.gca().xaxis.set_major_locator(locator)
+    plt.gca().xaxis.set_major_formatter(formatter)
+
     plt.plot(date, y_predicted)
     plt.plot(date, y_actual)
     plt.xlabel("Date")
     plt.ylabel("Minimum temperature")
+    plt.title("LinearSVR for minimum temperature")
 
     plt.show()
 

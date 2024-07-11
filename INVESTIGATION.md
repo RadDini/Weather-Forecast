@@ -61,28 +61,33 @@ Most common weather:
 
 
 ## 2. Max temp plot
-![img.png](images/temp_max.png)
+![img.png](images/max_temp_plot.png)
 
 Maximum temperatures indicate a moderate climate
 
 ## 3. FaceGrid max_temp
-![img.png](images/tamp_max_facetgrid.png)
+![img.png](images/max_temp_distr.png)
+
 
 An increase in maximum temperature can be observed from year to year.
 
 ## 4. Facegrid precipiation
-![img.png](images/precip_scatterplot.png)
+![img.png](images/precip_distr.png)
 
 ## 5. Weather countplot
-![img.png](images/weather_countplot.png)
+![img.png](images/weather_distr.png)
+
+
 ## 6. Weather piechart
 ![img.png](images/weather_piechart.png)
+
 
 
 # Predictions!!
 
 ## 1. Linear Regression with 80/20 split
 ![img.png](images/lr_default.png)
+
 
 blue line - prediction
 
@@ -105,7 +110,7 @@ Coeff:
 MSE: 11.297832171916616
 
 ## 2. Linear Regression with 1300 train units and 160 test
-![img.png](images/lr_random.png)
+![img.png](images/lr_custom.png)
 
 blue line - prediction
 
@@ -128,7 +133,8 @@ MSE: 9.570734696689296
 
 
 ## 3. SVR with 80/20 split for temp_min
-![img.png](images/svr_min_temp_default_split.png)
+![img.png](images/linearSVR_default.png)
+
 
 blue line - prediction
 
